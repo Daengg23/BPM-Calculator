@@ -1,0 +1,40 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPM Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="top-container">BPM Calculator
+        <p>How Fast are You Smashing Your Keyboard?</p>
+    </div>
+
+    <div class="main-body">
+        <div class="main-container">
+            <div class="counter-container">
+                <div class="counter">BPM: <span id="bpm-counter">0</span></div>
+                <div class="counter"><span id="time-counter">0</span> s</div>
+            </div>
+            <div class="input-container">
+                <input class="input-button" type="text" id="input-box" placeholder="Start Here">
+                <div class="input-button reset" id="reset-button">Reset</div>
+                <div class="input-button reset" id="reset-default-button">Reset To Default</div>
+            </div>
+            <div class="options-element"> <span>Test Time(s): </span><input type="text" id="test-time"></div>
+            <div class="options-element"> <span>BPM Update Time(ms): </span><input type="text" id="bpm-update-time"></div>
+            <div class="options-element"> <span>Scroll Speed(s): </span><input type="text" id="scroll-time"></div>
+        </div>
+
+        <div class="task-container"></div>
+        
+
+    </div>
+
+    <div class="hit-screen"></div>
+
+    
+</body>
+<script src="app.js"></script>
+</html>

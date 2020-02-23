@@ -1,0 +1,184 @@
+* {
+    font-family: monospace;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: rgb(226, 226, 226);
+}
+
+.top-container {
+    background-color: lightblue;
+    text-align: center;
+    font-size: 50px;
+    
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100%;
+}
+
+.top-container p {
+    font-size: 25px;
+}
+
+.main-body {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 130px;
+    
+
+}
+
+.main-container {
+    background-color: lightblue;
+    box-sizing: border-box;
+    width: 800px;
+    height: 400px;
+    padding: 30px;
+    display: block;
+
+}
+
+.options-element {
+    background-color: rgb(175, 175, 175);
+    height: 50px;
+    margin-top: 10px;
+    font-size: 30px;
+    text-align: start;
+    display: flex;
+    padding-left: 10px;
+}
+
+.options-element input {
+    height: 100%;
+    width: 50%;
+    font-size: 100%;
+}
+
+.options-element span {
+    width: 50%;
+}
+
+.counter {
+    font-size: 60px;
+    display: inline-block;
+    width: 50%;
+}
+
+.counter-container {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.input-button {
+    border: 0px solid;
+    text-align: center;
+    font-size: 30px;
+    display: inline-block;
+    padding-left: 10px;
+    padding-right: 10px;
+    cursor: pointer;
+    
+}
+
+input.input-button {
+    background: lightgreen;
+    width: 25%;
+}
+input.input-button:hover {
+    background: rgb(0, 181, 6);;
+}
+
+.reset {
+    background-color: lightcoral;
+}
+.reset:hover {
+    background-color: rgb(181, 0, 0);
+}
+
+.input-container {
+    width: 100%;
+    height: 50px;
+}
+
+.hit-screen {
+    background-color: black;
+    position: fixed;
+    bottom: 0px;
+    margin-top: 30px;
+    width: 100%;
+    height: 120px;
+}
+
+.tile {
+    background-color: red;
+    position: absolute;
+    height: 100%;
+    width: 0.3%;
+    left: 5%;
+    display: inline-block;
+
+    animation-name: moveTile;
+    animation-duration: 2s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: 1;
+    animation-timing-function: linear;
+}
+
+@keyframes moveTile{
+    0% {
+        left: 5%;
+    }
+    99% {
+        left: 100%;
+    }
+    100% {
+        display: none;
+        left: 101%;
+    }
+}
+
+.task-container {
+    background-color: lightslategray;
+    box-sizing: border-box;
+    width: 1000px;
+    margin-bottom: 20px;
+    padding: 30px;
+    display: block;
+    
+}
+
+.task-container span {
+    width: 80%;
+}
+
+.task-container div {
+    background-color: lightblue;
+    height: 45px;
+    margin-bottom: 20px;
+    font-size: 30px;
+    display: flex;
+    padding: 10px;
+}
+
+.task-container div div {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    position: relative;
+    left: 100px;
+}
+
+.task-container div div.complete {
+    background-color: gold;
+}
+.task-container div div.incomplete {
+    background-color: black;
+}
