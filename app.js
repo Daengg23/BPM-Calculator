@@ -10,7 +10,7 @@ let bpm = 0;
 
 const bpm_update_time_default = 100; // 100ms
 const test_max_time_default = 80; // 8s
-const scroll_speed_default = 5; // 2s
+const scroll_speed_default = 2; // 2s
 
 let bpm_update_time = bpm_update_time_default;
 let test_max_time = test_max_time_default;
@@ -29,6 +29,8 @@ const timer_count = document.querySelector("#time-counter");
 const input_fields = document.querySelector(".options-element input"); // we only need the input field inside of an option element
 const hit_screen = document.querySelector(".hit-screen");
 const task_container = document.querySelector(".task-container");
+let task_elements = document.querySelector(".task-container div");
+const scale_container = document.querySelector(".scale-container");
 
 // Options input fields
 const test_time_input = document.querySelector("#test-time");
@@ -45,12 +47,32 @@ function updateTestValues() {
     test_max_time = test_time_input.value;
     scroll_speed = scroll_speed_input.value;
     modifyTileSpeed();
+    constructScale();
 }
 
 function modifyTileSpeed() {
     const tileEl = document.querySelectorAll(".tile"); //gets all tile elements and puts them in an array
     for(let i = 0; i < tileEl.length; i++) {
         tileEl[i].style.animationDuration = scroll_speed + "s"
+    }
+
+}
+
+constructScale();
+
+
+function constructScale() {
+    scale_container.innerHTML = ""; //clears of previous scale
+    for(let i = 0; i < scroll_speed * 10; i++) {
+        console.log("make");
+        const pointEl = document.createElement("div");
+        pointEl.style = "display:inline-block; height:100%; width: " + 10 / scroll_speed + "%;"; // 10/1 = 10 segments, 10% each, 10/2 = 20 segmends, 5% each
+        pointEl.innerHTML = "<span style='position:absolute;width:0.2%; height:100%; background-color:rgb(105, 105, 105); '></span>"
+        if(i % 10)
+            pointEl.innerHTML += "|"; //NOTE: This is a bug, not a feature, find a proper workaround
+        else //NOTE: This scale is still very buggy and does not sync well with the notes yet
+            pointEl.innerHTML += ""; //NOTE: AniDuration could chnage how the notes appear on the screen, check the animations class
+        scale_container.appendChild(pointEl);
     }
 
 }
@@ -83,24 +105,36 @@ input_fields.addEventListener("click", (e) => {
     reset();
 });
 
+
 // This is auto
-/*
+
 window.setInterval(() => {
-    start = true;
     addClick();
-}, 1000);
-*/
+}, 1000 );
+
+
 
 window.setInterval(() => {
     updateTestValues();
     if(start) {
+        // game loop
         checkTimeout();
         checkAllTasks();
         passTime();
         calculateAverage();
+        time_between_clicks = 0; //resets time between clicks so that the only way it could be brought up again is by clicking
     }
 }, 10); // interval values that are less than 10 are inaccurate
 // 100 ticks = 1 second
+
+function updateTaskElementEventListeners() {
+    task_elements = document.querySelectorAll(".task-container div"); // updates all tasks that are shown
+    for(let i = 0; i < task_elements.length; i++) {
+        task_elements[i].addEventListener('mouseover', () => { 
+        });
+
+    }
+}
 
 function calculateAverage() {
     if(ticks * 10 % bpm_update_time === 0) { // 100 ticks is one second so 10 ticks is 100 ms
@@ -159,13 +193,13 @@ function resetDefault() {
 
 function addTile() {
     const tile = document.createElement('span');
-    tile.innerHTML = '<div class="tile"><span style="font-size: 15px; color:lightgreen; position: relative; left:7px;">'+ time_between_clicks +'ms</span></div>';
+    tile.innerHTML = '<div class="tile"><span style="font-size: 150%; color:lightgreen; position: relative; left:7px;">'+ time_between_clicks +'ms</span></div>';
     hit_screen.appendChild(tile);
 
     const tileClass = document.querySelector(".tile");
     const myStyle = getComputedStyle(tileClass);
     const tempAniDuration = parseInt(myStyle.animationDuration.substring(0, myStyle.animationDuration.length - 1)); // you cant directly put this value into the equation when setting the setTimeout timeout time, you must make a new variable and use that
-    const aniDuration = tempAniDuration * 1000 - 50;
+    const aniDuration = tempAniDuration * 1000 - 10;
 
     setTimeout(() => {
         tile.remove();
@@ -175,12 +209,18 @@ function addTile() {
 
 
 class Task {
-    constructor(name, description) {
+    constructor(name, description, type, val1=0, val2=0, duration=0, delay=0, goal=0) {
         this.name = name;
         this.description = description;
         this.complete = false;
         this.timer = 0;
         this.count = 0;
+        this.val1 = val1;
+        this.val2 = val2;
+        this.duration = duration;
+        this.delay = delay;
+        this.goal = goal;
+        this.type = type;
     }
 
     getName() {
@@ -212,82 +252,104 @@ class Task {
         // new Val has to be a boolean
         this.complete = newVal;
     }
+
+    getType() {
+        return this.type;
+    }
+
+    inBetween(bpm, ticks) {
+        // val1 = min bpm limit
+        // val2 = max bpm limit
+        // goal = time needed to complete
+        // ticks prevent timers from being spammed
+        if((bpm > this.val1 && bpm < this.val2) && (ticks % 100 == 0)){ // this would only be check every second
+            this.setTimer(this.getTimer() + 1);
+        } else if(bpm >= this.val2 || bpm <= this.val1) {
+            this.setTimer(0);
+        }
+        if(this.getTimer() >= this.goal) {
+            this.setComplete(true);
+        }
+    }
+
+    goOver(bpm) {
+        // goal = bpm goal
+        if(bpm >= this.goal) {
+            this.setComplete(true);
+        }
+    }
+
+    hitConsecutive(timeBetweenClicks) {
+        // val1 = desired tbc
+        // val2 = margin of error
+        // goal = number of consecutive tbc
+        // when timer is 0, there is no valid tbc, valid times are shown when a click is registered
+        if(timeBetweenClicks >= this.val1 - this.val2 && timeBetweenClicks <= this.val1 + this.val2) { // allows for margin of error with val2
+            this.setCount(this.getCount() + 1);
+        } else if((timeBetweenClicks >= this.val + this.val2 || timeBetweenClicks <= this.val1 - this.val2) && timeBetweenClicks != 0) { // when tbc goes out of range
+            this.setCount(0);
+        }
+        if(this.getCount() >= this.goal) {
+            this.setComplete(true);
+        }
+    }
+
+
 }
 
+let task1 = new Task("Hit Over 500BPM", "Easy", "goOver", 0, 0, 0, 0, 500);
+let task2 = new Task("Hit Over 1000BPM", "Medium", "goOver", 0, 0, 0, 0, 1000);
+let task3 = new Task("Hit Over 2000BPM", "Hard", "goOver", 0, 0, 0, 0, 2000);
+let task4 = new Task("Hit Over 3000BPM", "Extreme", "goOver", 0, 0, 0, 0, 3000);
+
+let hitConsecutive1 = new Task("Hit 4 (250ms) notes in a row, 50ms accuracy", "Easy", "hitConsecutive", 250, 50, 0, 0, 4);
+let hitConsecutive2 = new Task("Hit 16 (500ms) notes in a row, 50ms accuracy", "Easy", "hitConsecutive", 500, 50, 0, 0, 16);
+let hitConsecutive3 = new Task("Hit 32 (100ms) notes in a row, 10ms accuracy", "Medium", "hitConsecutive", 100, 10, 0, 0, 32);
+let hitConsecutive4 = new Task("Hit 64 (50ms) notes in a row, 10ms accuracy", "Hard", "hitConsecutive", 50, 10, 0, 0, 64);
+let hitConsecutive5 = new Task("Hit 12 (1500ms) notes in a row, 10ms accuracy", "Extreme", "hitConsecutive", 1500, 10, 0, 0, 12);
+
+
+let betweenTask1 = new Task("Stay Between 200-250BPM for 5 Sec", "Easy", "inBetween", 200, 250, 0, 0, 5);
+let betweenTask2 = new Task("Stay Between 550-600BPM for 10 Sec", "Medium", "inBetween", 550, 600, 0, 0, 10);
+let betweenTask3 = new Task("Stay Between 900-925BPM for 15 Sec", "Hard", "inBetween", 900, 925, 0, 0, 15);
+
+let allTasks = [
+    task1, 
+    task2, 
+    task3, 
+    task4,
+    betweenTask1,
+    betweenTask2,
+    betweenTask3,
+    hitConsecutive1,
+    hitConsecutive2,
+    hitConsecutive3,
+    hitConsecutive4,
+    hitConsecutive5
+];
+
 function checkAllTasks() {
-    if(bpm_update_time >= 100) {
-        if(!task1.getComplete()) {
-            if(bpm >= 200) {
-                task1.setComplete(true);
-                updateTasks(); // updates the shown tasks if they are completed
+    for(let i = 0; i < allTasks.length; i++) {
+        if(bpm_update_time >= bpm_update_time_default) {
+            if(!(allTasks[i].getComplete())) {
+                if(allTasks[i].getType() === "goOver")
+                    allTasks[i].goOver(bpm);
+                if(allTasks[i].getType() === "inBetween")
+                    allTasks[i].inBetween(bpm, ticks);
+                if(allTasks[i].getType() === "hitConsecutive")
+                    allTasks[i].hitConsecutive(time_between_clicks);
             }
+            
         }
-        if(!task2.getComplete()) {
-            if(bpm >= 1000) {
-                task2.setComplete(true);
-                updateTasks();
-            }
-        }
-        if(!task3.getComplete()) {
-            if(bpm >= 2000) {
-                task3.setComplete(true);
-                updateTasks();
-            }
-        }
-        if(!task4.getComplete()) {
-            if(bpm >= 3000) {
-                task4.setComplete(true);
-                updateTasks();
-            }
-        }
-
-
-
-        if(!betweenTask1.getComplete()) {
-            if((bpm > 200 && bpm < 250) && (ticks % 100 == 0)){ // this would only be check every second
-                betweenTask1.setTimer(betweenTask1.getTimer() + 1);
-            } else if(bpm >= 250 || bpm <= 200) {
-                betweenTask1.setTimer(0);
-            }
-            if(betweenTask1.getTimer() >= 5) {
-                betweenTask1.setComplete(true);
-                updateTasks();
-            }
-        }
-        if(!betweenTask2.getComplete()) {
-            if((bpm > 550 && bpm < 600) && (ticks % 100 == 0)){ // this would only be check every second
-                betweenTask2.setTimer(betweenTask2.getTimer() + 1);
-            } else if(bpm >= 600 || bpm <= 550) {
-                betweenTask2.setTimer(0);
-            }
-            if(betweenTask2.getTimer() >= 10) {
-                betweenTask2.setComplete(true);
-                updateTasks();
-            }
-        }
-        console.log(betweenTask2.getTimer());
-        if(!betweenTask3.getComplete()) {
-            if((bpm > 900 && bpm < 925) && (ticks % 100 == 0)){ // this would only be check every second
-                betweenTask3.setTimer(betweenTask3.getTimer() + 1);
-            } else if(bpm >= 925 || bpm <= 900) {
-                betweenTask3.setTimer(0);
-            }
-            if(betweenTask3.getTimer() >= 15) {
-                betweenTask3.setComplete(true);
-                updateTasks();
-            }
-        }
-
     }
-    
+    updateTasks();
 }
 
 
 function addTask(task) {
     const taskEl = document.createElement("div");
 
-    taskEl.innerHTML = 
-        '<span>' + task.getName() + '</span>';
+    taskEl.innerHTML = '<span>' + task.getName() + '</span>';
     
     if(task.getComplete() == true) {
         taskEl.innerHTML += '<div class="complete"></div>';
@@ -301,29 +363,12 @@ function removeTasks() {
     task_container.innerHTML = "";
 }
 
-let task1 = new Task("Hit Over 200BPM", "Easy");
-let task2 = new Task("Hit Over 1000BPM", "Medium");
-let task3 = new Task("Hit Over 2000BPM", "Hard");
-let task4 = new Task("Hit Over 3000BPM", "Extreme");
-
-let betweenTask1 = new Task("Stay Between 200-250BPM for 5 Sec", "Easy");
-let betweenTask2 = new Task("Stay Between 550-600BPM for 10 Sec", "Medium");
-let betweenTask3 = new Task("Stay Between 900-925BPM for 15 Sec", "Hard");
-
 function updateTasks() {
     removeTasks();
-    let allTasks = [
-        task1, 
-        task2, 
-        task3, 
-        task4,
-        betweenTask1,
-        betweenTask2,
-        betweenTask3
-    ];
     for(i = 0; i < allTasks.length; i++) {
         addTask(allTasks[i]);
     }
+    updateTaskElementEventListeners();
 }
 
 updateTasks();

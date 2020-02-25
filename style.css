@@ -25,13 +25,11 @@ body {
 
 .main-body {
     width: 100%;
-    height: 100%;
+    height: 400px;
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
     margin-top: 130px;
-    
+    justify-content: center;
 
 }
 
@@ -39,7 +37,7 @@ body {
     background-color: lightblue;
     box-sizing: border-box;
     width: 800px;
-    height: 400px;
+    height: 100%;
     padding: 30px;
     display: block;
 
@@ -49,7 +47,7 @@ body {
     background-color: rgb(175, 175, 175);
     height: 50px;
     margin-top: 10px;
-    font-size: 30px;
+    font-size: 25px;
     text-align: start;
     display: flex;
     padding-left: 10px;
@@ -66,7 +64,7 @@ body {
 }
 
 .counter {
-    font-size: 60px;
+    font-size: 40px;
     display: inline-block;
     width: 50%;
 }
@@ -95,6 +93,12 @@ input.input-button:hover {
     background: rgb(0, 181, 6);;
 }
 
+.input-container {
+    width: 100%;
+    height: 50px;
+    margin-bottom: 10px;
+}
+
 .reset {
     background-color: lightcoral;
 }
@@ -102,9 +106,12 @@ input.input-button:hover {
     background-color: rgb(181, 0, 0);
 }
 
-.input-container {
+.hit-screen-container {
+    background:green;
+    position: fixed;
     width: 100%;
-    height: 50px;
+    height: 20%;
+    bottom: 0px;
 }
 
 .hit-screen {
@@ -113,7 +120,7 @@ input.input-button:hover {
     bottom: 0px;
     margin-top: 30px;
     width: 100%;
-    height: 120px;
+    height: 15%;
 }
 
 .tile {
@@ -125,15 +132,23 @@ input.input-button:hover {
     display: inline-block;
 
     animation-name: moveTile;
-    animation-duration: 2s;
+    animation-duration: 5s;
     animation-fill-mode: forwards;
     animation-iteration-count: 1;
     animation-timing-function: linear;
 }
 
+.scale-container {
+    background-color: gray;
+    position: fixed;
+    width: 100%;
+    height: 5%;
+
+}
+
 @keyframes moveTile{
     0% {
-        left: 5%;
+        left: 0%;
     }
     99% {
         left: 100%;
@@ -147,11 +162,11 @@ input.input-button:hover {
 .task-container {
     background-color: lightslategray;
     box-sizing: border-box;
-    width: 1000px;
-    margin-bottom: 20px;
+    width: 500px;
+    height: 100%;
+    margin-bottom: 50px;
     padding: 30px;
-    display: block;
-    
+    overflow: auto;
 }
 
 .task-container span {
@@ -162,7 +177,7 @@ input.input-button:hover {
     background-color: lightblue;
     height: 45px;
     margin-bottom: 20px;
-    font-size: 30px;
+    font-size: 20px;
     display: flex;
     padding: 10px;
 }
@@ -173,7 +188,7 @@ input.input-button:hover {
     height: 25px;
     border-radius: 50%;
     position: relative;
-    left: 100px;
+    margin: auto;
 }
 
 .task-container div div.complete {
