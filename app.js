@@ -50,29 +50,33 @@ function updateTestValues() {
     constructScale();
 }
 
+//NOTE: Test values should be updated only when they are modified, make each input field have an event listener
+
 function modifyTileSpeed() {
     const tileEl = document.querySelectorAll(".tile"); //gets all tile elements and puts them in an array
     for(let i = 0; i < tileEl.length; i++) {
         tileEl[i].style.animationDuration = scroll_speed + "s"
     }
-
 }
 
-constructScale();
 
 
 function constructScale() {
     scale_container.innerHTML = ""; //clears of previous scale
     for(let i = 0; i < scroll_speed * 10; i++) {
-        console.log("make");
         const pointEl = document.createElement("div");
         pointEl.style = "display:inline-block; height:100%; width: " + 10 / scroll_speed + "%;"; // 10/1 = 10 segments, 10% each, 10/2 = 20 segmends, 5% each
-        pointEl.innerHTML = "<span style='position:absolute;width:0.2%; height:100%; background-color:rgb(105, 105, 105); '></span>"
-        if(i % 10)
-            pointEl.innerHTML += "|"; //NOTE: This is a bug, not a feature, find a proper workaround
-        else //NOTE: This scale is still very buggy and does not sync well with the notes yet
-            pointEl.innerHTML += ""; //NOTE: AniDuration could chnage how the notes appear on the screen, check the animations class
-        scale_container.appendChild(pointEl);
+
+        if(i % 10) { // Giving different scale sizes
+            pointEl.innerHTML = "<span style='position:absolute; bottom:0; width:0.2%; height:50%; background-color:rgb(105, 105, 105); '></span>"; 
+        } else if(i % 5){
+            pointEl.innerHTML = "<span style='position:absolute; bottom:0; width:0.2%; height:25%; background-color:rgb(105, 105, 105); '></span>"; 
+        } else 
+            pointEl.innerHTML = "<span style='position:absolute; bottom:0; width:0.2%; height:100%; background-color:rgb(105, 105, 105); '></span>"; 
+        
+        
+        
+            scale_container.appendChild(pointEl);
     }
 
 }
@@ -330,8 +334,10 @@ let allTasks = [
 
 function checkAllTasks() {
     for(let i = 0; i < allTasks.length; i++) {
+        let completed = undefined;
         if(bpm_update_time >= bpm_update_time_default) {
             if(!(allTasks[i].getComplete())) {
+                completed = false;
                 if(allTasks[i].getType() === "goOver")
                     allTasks[i].goOver(bpm);
                 if(allTasks[i].getType() === "inBetween")
@@ -341,8 +347,14 @@ function checkAllTasks() {
             }
             
         }
+        if(allTasks[i].getComplete() == true && completed == false) { // completed would only be false when it is check that the task is incomplete
+            completed = true;
+        }
+        if(completed == true){
+            updateTasks(); // the tasks are only updated when a task is detected to be incomplete and is completed within this iteration
+        }
     }
-    updateTasks();
+    
 }
 
 
